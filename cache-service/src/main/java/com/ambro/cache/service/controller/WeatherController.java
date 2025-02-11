@@ -21,7 +21,7 @@ public class WeatherController {
     }
 
     @GetMapping
-    public JSONObject get(@RequestParam("city") String city){
+    public Weather get(@RequestParam("city") String city){
         return service.getWeather(city);
     }
 
@@ -31,13 +31,13 @@ public class WeatherController {
     }
 
     @PutMapping
-    public JSONObject update(@RequestParam("city") String city, @RequestParam("weather") String weather){
+    public Weather update(@RequestParam("city") String city, @RequestParam("weather") String weather){
         return service.updateWeather(city, weather);
     }
 
     @DeleteMapping
-    public JSONObject delete(@RequestParam("city") String city){
-        return service.deleteWeather(city);
+    public void delete(@RequestParam("city") String city){
+        service.deleteWeather(city);
     }
 
     @GetMapping("getAll")

@@ -2,6 +2,7 @@ package com.ambro.cache.service.service;
 
 import com.ambro.cache.service.entity.Weather;
 import com.ambro.cache.service.repository.WeatherRepository;
+import jakarta.transaction.Transactional;
 import org.json.simple.JSONObject;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -32,51 +33,34 @@ public class WeatherService {
     }
 
     @Cacheable(value = "weather", key = "#city")
-    public JSONObject getWeather(String city){
-        JSONObject res = new JSONObject();
-
+    public Weather getWeather(String city){
         Optional<Weather> weatherOptional = repo.findById(city);
         if(weatherOptional.isPresent()){
-            res.put("city", weatherOptional.get().getCity());
-            res.put("weather", weatherOptional.get().getWeather());
-        }else{
-            res.put("Status", "Not found");
+            return weatherOptional.get();
         }
-        return res;
+        return null;
     }
 
     @CachePut(value = "weather", key = "#city")
-    public JSONObject updateWeather(String city, String weather){
-        JSONObject res = new JSONObject();
-
+    public Weather updateWeather(String city, String weather){
+        Weather res = new Weather();
         Optional<Weather> weatherOptional = repo.findById(city);
         if(weatherOptional.isPresent()){
-            Weather weatherObj = weatherOptional.get();
-            weatherObj.setWeather(weather);
-            repo.save(weatherObj);
-            res.put("city", weatherObj.getCity());
-            res.put("weather", weatherObj.getWeather());
-            res.put("Status", city + " weather updated");
-        }else{
-            res.put("Status", "Not found");
+            res = weatherOptional.get();
+            res.setWeather(weather);
+            return res;
         }
-        return res;
+        return null;
     }
 
+    @Transactional
     @CacheEvict(value = "weather", key = "#city")
-    public JSONObject deleteWeather(String city){
-        JSONObject res = new JSONObject();
-
+    public void deleteWeather(String city){
         Optional<Weather> weatherOptional = repo.findById(city);
         if(weatherOptional.isPresent()){
             Weather weatherObj = weatherOptional.get();
-            repo.delete(weatherObj);
-            res.put("city", weatherObj.getCity());
-            res.put("Status", "City deleted");
-        }else{
-            res.put("Status", "Not found");
+            repo.deleteById(weatherObj.getCity());
         }
-        return res;
     }
 
     public List<Weather> getAll(){
